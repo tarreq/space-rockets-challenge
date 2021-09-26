@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { Badge, Box, Image, SimpleGrid, Text, Flex, Button } from "@chakra-ui/core";
+import React, { useContext } from "react";
+import { MainContext } from "../contexts/MainContext"
+import { Badge, Box, Image, SimpleGrid, Text, Flex } from "@chakra-ui/core";
 import { format as timeAgo } from "timeago.js";
 import { Link } from "react-router-dom";
 import { BsHeart, BsFillHeartFill } from 'react-icons/bs';
@@ -13,9 +14,7 @@ import LoadMoreButton from "./load-more-button";
 
 const PAGE_SIZE = 12;
 
-export default function Launches({favoriteLaunches, handleAddFavorite}) {
-
-
+export default function Launches() {
   const { data, error, isValidating, setSize, size } = useSpaceXPaginated(
     "/launches/past",
     {
@@ -36,7 +35,7 @@ export default function Launches({favoriteLaunches, handleAddFavorite}) {
           data
             .flat()
             .map((launch) => (
-              <LaunchItem favoriteLaunches={favoriteLaunches} handleAddFavorite={handleAddFavorite} launch={launch} key={launch.flight_number} />
+              <LaunchItem launch={launch} key={launch.flight_number} />
             ))}
       </SimpleGrid>
       <LoadMoreButton
@@ -49,7 +48,8 @@ export default function Launches({favoriteLaunches, handleAddFavorite}) {
   );
 }
 
-export function LaunchItem({ launch, handleAddFavorite, favoriteLaunches }) {
+export function LaunchItem({ launch }) {
+  const { favoriteLaunches, toggleFavorite } = useContext(MainContext)
   
   return (
     <Box
@@ -109,9 +109,9 @@ export function LaunchItem({ launch, handleAddFavorite, favoriteLaunches }) {
           
           <Box>
             {favoriteLaunches && favoriteLaunches.includes(launch.flight_number) ?
-             <BsFillHeartFill color="red" onClick={(e) => handleAddFavorite(e, launch.flight_number)} size="24px" />
+             <BsFillHeartFill color="red" onClick={(e) => toggleFavorite(e, launch.flight_number)} size="24px" />
              :
-             <BsHeart onClick={(e) => handleAddFavorite(e, launch.flight_number)} size="24px" />
+             <BsHeart onClick={(e) => toggleFavorite(e, launch.flight_number)} size="24px" />
             }
           </Box>
         </Box>

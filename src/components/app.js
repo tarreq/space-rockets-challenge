@@ -1,9 +1,8 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { 
   Flex, 
   Text, 
-  Box, 
   useDisclosure,
   Drawer,
   DrawerBody,
@@ -21,40 +20,51 @@ import Launch from "./launch";
 import Home from "./home";
 import LaunchPads from "./launch-pads";
 import LaunchPad from "./launch-pad";
+import { MainContext } from "../contexts/MainContext"
 
 export default function App() {
   const [favoriteLaunches, setFavoriteLaunches] = useState([])
+  const [favoritesLoaded, setFavoritesLoaded] = useState(false)
   
-  const handleAddFavorite = (e, flight_number) => {
+  
+  const toggleFavorite = (e, flight_number) => {
     e.preventDefault();
-    if(!favoriteLaunches.includes(flight_number)) setFavoriteLaunches([...favoriteLaunches, flight_number])
-    
+    if(!favoriteLaunches.includes(flight_number)) {
+      setFavoriteLaunches([...favoriteLaunches, flight_number])
+    }
+    else {
+      setFavoriteLaunches(favoriteLaunches.filter(favorited_flight_number => favorited_flight_number !== flight_number ))
+    } 
   }
 
   useEffect(() => {
-    if(localStorage.spaceXLaunches && JSON.parse(localStorage.spaceXLaunches).length > 0) {
-      const itemsInStorage = JSON.parse(localStorage.spaceXLaunches) // array
-      localStorage.spaceXLaunches = JSON.stringify([...new Set([...favoriteLaunches, ...itemsInStorage])])
-    } 
-    else localStorage.setItem('spaceXLaunches', JSON.stringify(favoriteLaunches))
-  }, [favoriteLaunches])
+    if(favoritesLoaded) localStorage.setItem('spaceXLaunches', JSON.stringify(favoriteLaunches))
+  }, [favoriteLaunches, favoritesLoaded])
 
   useEffect(() => {
     if(JSON.parse(localStorage.spaceXLaunches).length > 0) {
       setFavoriteLaunches(JSON.parse(localStorage.spaceXLaunches))
     }
+    setFavoritesLoaded(true)
   }, [])
+
+  const store = {
+    favoriteLaunches,
+    toggleFavorite
+  }
 
   return (
     <div>
-      <NavBar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/launches" element={<Launches handleAddFavorite={handleAddFavorite} favoriteLaunches={favoriteLaunches} />} />
-        <Route path="/launches/:launchId" element={<Launch />} />
-        <Route path="/launch-pads" element={<LaunchPads />} />
-        <Route path="/launch-pads/:launchPadId" element={<LaunchPad />} />
-      </Routes>
+      <MainContext.Provider value={store}>
+        <NavBar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/launches" element={<Launches />} />
+          <Route path="/launches/:launchId" element={<Launch />} />
+          <Route path="/launch-pads" element={<LaunchPads />} />
+          <Route path="/launch-pads/:launchPadId" element={<LaunchPad />} />
+        </Routes>
+      </MainContext.Provider>
     </div>
   );
 }

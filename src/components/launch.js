@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useContext} from "react";
+import { MainContext } from "../contexts/MainContext"
 import { useParams, Link as RouterLink } from "react-router-dom";
 import { format as timeAgo } from "timeago.js";
 import { Watch, MapPin, Navigation, Layers } from "react-feather";
+import { BsHeart, BsFillHeartFill } from 'react-icons/bs';
 import {
   Flex,
   Heading,
@@ -64,6 +66,8 @@ export default function Launch() {
 }
 
 function Header({ launch }) {
+  const { favoriteLaunches, toggleFavorite } = useContext(MainContext)
+
   return (
     <Flex
       bgImage={`url(${launch.links.flickr_images[0]})`}
@@ -109,6 +113,13 @@ function Header({ launch }) {
             Failed
           </Badge>
         )}
+        <Box as="button">
+            {favoriteLaunches && favoriteLaunches.includes(launch.flight_number) ?
+             <BsFillHeartFill color="red" onClick={(e) => toggleFavorite(e, launch.flight_number)} size="24px" />
+             :
+             <BsHeart onClick={(e) => toggleFavorite(e, launch.flight_number)} size="24px" />
+            }
+          </Box>
       </Stack>
     </Flex>
   );
