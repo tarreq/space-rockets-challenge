@@ -1,7 +1,9 @@
-import React from "react";
-import { Badge, Box, Image, SimpleGrid, Text, Flex } from "@chakra-ui/core";
+import React, { useState, useEffect } from "react";
+import { Badge, Box, Image, SimpleGrid, Text, Flex, Button } from "@chakra-ui/core";
 import { format as timeAgo } from "timeago.js";
 import { Link } from "react-router-dom";
+import { BsHeart, BsFillHeartFill } from 'react-icons/bs';
+
 
 import { useSpaceXPaginated } from "../utils/use-space-x";
 import { formatDate } from "../utils/format-date";
@@ -11,7 +13,9 @@ import LoadMoreButton from "./load-more-button";
 
 const PAGE_SIZE = 12;
 
-export default function Launches() {
+export default function Launches({favoriteLaunches, handleAddFavorite}) {
+
+
   const { data, error, isValidating, setSize, size } = useSpaceXPaginated(
     "/launches/past",
     {
@@ -32,7 +36,7 @@ export default function Launches() {
           data
             .flat()
             .map((launch) => (
-              <LaunchItem launch={launch} key={launch.flight_number} />
+              <LaunchItem favoriteLaunches={favoriteLaunches} handleAddFavorite={handleAddFavorite} launch={launch} key={launch.flight_number} />
             ))}
       </SimpleGrid>
       <LoadMoreButton
@@ -45,7 +49,8 @@ export default function Launches() {
   );
 }
 
-export function LaunchItem({ launch }) {
+export function LaunchItem({ launch, handleAddFavorite, favoriteLaunches }) {
+  
   return (
     <Box
       as={Link}
@@ -79,7 +84,8 @@ export function LaunchItem({ launch }) {
       />
 
       <Box p="6">
-        <Box d="flex" alignItems="baseline">
+        <Box d="flex" alignItems="baseline" justifyContent="space-between">
+          <Box d="flex">
           {launch.launch_success ? (
             <Badge px="2" variant="solid" variantColor="green">
               Successful
@@ -98,6 +104,15 @@ export function LaunchItem({ launch }) {
             ml="2"
           >
             {launch.rocket.rocket_name} &bull; {launch.launch_site.site_name}
+          </Box>
+          </Box>
+          
+          <Box>
+            {favoriteLaunches && favoriteLaunches.includes(launch.flight_number) ?
+             <BsFillHeartFill color="red" onClick={(e) => handleAddFavorite(e, launch.flight_number)} size="24px" />
+             :
+             <BsHeart onClick={(e) => handleAddFavorite(e, launch.flight_number)} size="24px" />
+            }
           </Box>
         </Box>
 
