@@ -5,25 +5,16 @@ import { format as timeAgo } from "timeago.js";
 import { Link } from "react-router-dom";
 import { BsHeart, BsFillHeartFill } from 'react-icons/bs';
 
-
-import { useSpaceXPaginated } from "../utils/use-space-x";
 import { formatDate } from "../utils/format-date";
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
 import LoadMoreButton from "./load-more-button";
 
-const PAGE_SIZE = 12;
+
 
 export default function Launches() {
-  const { data, error, isValidating, setSize, size } = useSpaceXPaginated(
-    "/launches/past",
-    {
-      limit: PAGE_SIZE,
-      order: "desc",
-      sort: "launch_date_utc",
-    }
-  );
-  console.log(data, error);
+  const { data, error, isValidating, setSize, size, PAGE_SIZE } = useContext(MainContext)
+
   return (
     <div>
       <Breadcrumbs

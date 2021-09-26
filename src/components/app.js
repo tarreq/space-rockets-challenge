@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Routes, Route } from "react-router-dom";
 import { 
   Flex, 
@@ -12,8 +12,11 @@ import {
   DrawerContent,
   DrawerCloseButton,
   Button,
-  Input
+  Stack,
+  Heading
   } from "@chakra-ui/core";
+
+import { useSpaceXPaginated } from "../utils/use-space-x";
 
 import Launches from "./launches";
 import Launch from "./launch";
@@ -21,14 +24,29 @@ import Home from "./home";
 import LaunchPads from "./launch-pads";
 import LaunchPad from "./launch-pad";
 import { MainContext } from "../contexts/MainContext"
+import FavoriteLaunchItem from "./FavoriteLaunchItem";
+
+const PAGE_SIZE = 12;
 
 export default function App() {
   const [favoriteLaunches, setFavoriteLaunches] = useState([])
+  const [favoriteLaunchePads, setFavoriteLaunchePads] = useState([])
   const [favoritesLoaded, setFavoritesLoaded] = useState(false)
+
+  const { data, error, isValidating, setSize, size } = useSpaceXPaginated(
+    "/launches/past",
+    {
+      limit: PAGE_SIZE,
+      order: "desc",
+      sort: "launch_date_utc",
+    }
+  );
+  console.log(data, error);
   
   
   const toggleFavorite = (e, flight_number) => {
     e.preventDefault();
+    e.stopPropagation();
     if(!favoriteLaunches.includes(flight_number)) {
       setFavoriteLaunches([...favoriteLaunches, flight_number])
     }
@@ -50,7 +68,13 @@ export default function App() {
 
   const store = {
     favoriteLaunches,
-    toggleFavorite
+    toggleFavorite,
+    data, 
+    error, 
+    isValidating, 
+    setSize, 
+    size,
+    PAGE_SIZE
   }
 
   return (
@@ -96,6 +120,8 @@ function NavBar() {
 function FavoritesDrawer() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
+  const { data, favoriteLaunches } = useContext(MainContext)
+
   return (
     <>
       <Button ref={btnRef} bg="gray.600" onClick={onOpen}>
@@ -106,14 +132,38 @@ function FavoritesDrawer() {
         placement="right"
         onClose={onClose}
         finalFocusRef={btnRef}
+        scrollBehavior="inside"
+        size="sm"
       >
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader>Favorites</DrawerHeader>
+          <DrawerHeader>
+            <Flex align="center" justify="center">
+              Favorites
+            </Flex>
+          </DrawerHeader>
+          
 
           <DrawerBody>
-            <Input placeholder="Type here..." />
+            <Stack>
+            <Heading
+              display="inline"
+              fontSize={["md", "xl"]}
+              // px="2"
+              py="2"
+              borderRadius="lg"
+            >
+              Launches
+            </Heading>
+              {data &&
+              data
+                .flat()
+                .filter((launch) => favoriteLaunches.includes(launch.flight_number))
+                .map((launch) => (
+                  <FavoriteLaunchItem launch={launch} key={launch.flight_number} />
+                ))}
+            </Stack>
           </DrawerBody>
 
           <DrawerFooter>
