@@ -115,9 +115,9 @@ function Header({ launch }) {
         )}
         <Box as="button">
             {favoriteLaunches && favoriteLaunches.includes(launch.flight_number) ?
-             <BsFillHeartFill color="red" onClick={(e) => toggleFavorite(e, launch.flight_number)} size="24px" />
+             <BsFillHeartFill color="red" onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} size="24px" />
              :
-             <BsHeart onClick={(e) => toggleFavorite(e, launch.flight_number)} size="24px" />
+             <BsHeart onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} size="24px" />
             }
           </Box>
       </Stack>

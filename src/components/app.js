@@ -25,15 +25,15 @@ import LaunchPads from "./launch-pads";
 import LaunchPad from "./launch-pad";
 import { MainContext } from "../contexts/MainContext"
 import FavoriteLaunchItem from "./FavoriteLaunchItem";
+import FavoriteLaunchPadItem from "./FavoriteLaunchPadItem";
 
 const PAGE_SIZE = 12;
 
 export default function App() {
-  const [favoriteLaunches, setFavoriteLaunches] = useState([])
-  const [favoriteLaunchePads, setFavoriteLaunchePads] = useState([])
+  const [favorites, setFavorites] = useState({launches: [], launchPads: []})
   const [favoritesLoaded, setFavoritesLoaded] = useState(false)
 
-  const { data, error, isValidating, setSize, size } = useSpaceXPaginated(
+  const { data: launchesData, error: launchesDataError, isValidating: isValidatingLaunches, setSize, size } = useSpaceXPaginated(
     "/launches/past",
     {
       limit: PAGE_SIZE,
@@ -41,37 +41,52 @@ export default function App() {
       sort: "launch_date_utc",
     }
   );
-  console.log(data, error);
+
+  const { data: launchPadsData, error: launchPadsDataError, isValidating: isValidatingLaunchPads } = useSpaceXPaginated(
+    "/launchpads",
+    {
+      limit: PAGE_SIZE,
+    }
+  );
   
-  
-  const toggleFavorite = (e, flight_number) => {
+  const toggleFavorite = (e, id, type) => {
     e.preventDefault();
     e.stopPropagation();
-    if(!favoriteLaunches.includes(flight_number)) {
-      setFavoriteLaunches([...favoriteLaunches, flight_number])
+    if(!favorites[type].includes(id)) {
+      setFavorites({...favorites, [type]: [...favorites[type], id]});
     }
     else {
-      setFavoriteLaunches(favoriteLaunches.filter(favorited_flight_number => favorited_flight_number !== flight_number ))
+      setFavorites({...favorites, [type]:favorites[type]
+        .filter(favorited_flight_number => favorited_flight_number !== id )});
     } 
   }
 
   useEffect(() => {
-    if(favoritesLoaded) localStorage.setItem('spaceXLaunches', JSON.stringify(favoriteLaunches))
-  }, [favoriteLaunches, favoritesLoaded])
+    if(favoritesLoaded) {
+      localStorage.setItem('spaceXLaunches', JSON.stringify(favorites['launches']));
+      localStorage.setItem('spaceXLaunchPads', JSON.stringify(favorites['launchPads']));
+    }
+  }, [favorites, favoritesLoaded])
 
   useEffect(() => {
-    if(JSON.parse(localStorage.spaceXLaunches).length > 0) {
-      setFavoriteLaunches(JSON.parse(localStorage.spaceXLaunches))
-    }
-    setFavoritesLoaded(true)
+    setFavorites({
+      launches: localStorage.spaceXLaunches && JSON.parse(localStorage.spaceXLaunches).length > 0 
+      ? JSON.parse(localStorage.spaceXLaunches)
+      : favorites['launches'],
+      launchPads: localStorage.spaceXLaunchPads && JSON.parse(localStorage.spaceXLaunchPads).length > 0
+      ? JSON.parse(localStorage.spaceXLaunchPads)
+      : favorites['launchPads']
+    });
+    setFavoritesLoaded(true);
   }, [])
 
   const store = {
-    favoriteLaunches,
+    favoriteLaunches: favorites['launches'],
+    favoriteLaunchPads: favorites['launchPads'],
     toggleFavorite,
-    data, 
-    error, 
-    isValidating, 
+    data: {launches: launchesData, launchPads: launchPadsData}, 
+    error: {launches: launchesDataError, launchPads: launchPadsDataError}, 
+    isValidating: {launches: isValidatingLaunches, launchPads: isValidatingLaunchPads}, 
     setSize, 
     size,
     PAGE_SIZE
@@ -120,7 +135,7 @@ function NavBar() {
 function FavoritesDrawer() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
-  const { data, favoriteLaunches } = useContext(MainContext)
+  const { data, favoriteLaunches, favoriteLaunchPads } = useContext(MainContext)
 
   return (
     <>
@@ -147,22 +162,30 @@ function FavoritesDrawer() {
 
           <DrawerBody>
             <Stack>
-            <Heading
-              display="inline"
-              fontSize={["md", "xl"]}
-              // px="2"
-              py="2"
-              borderRadius="lg"
-            >
-              Launches
-            </Heading>
-              {data &&
-              data
-                .flat()
-                .filter((launch) => favoriteLaunches.includes(launch.flight_number))
-                .map((launch) => (
-                  <FavoriteLaunchItem launch={launch} key={launch.flight_number} />
-                ))}
+              {favoriteLaunches && favoriteLaunches.length > 0 &&
+                <Heading fontSize={["md", "xl"]} py="2">
+                  Launches
+                </Heading>}
+              {/* Launches favorites */}
+              {data.launches &&
+                data.launches
+                  .flat()
+                  .filter((launch) => favoriteLaunches.includes(launch.flight_number))
+                  .map((launch) => (
+                    <FavoriteLaunchItem launch={launch} key={launch.flight_number} />
+                  ))}
+              {favoriteLaunchPads && favoriteLaunchPads.length > 0 &&
+                <Heading fontSize={["md", "xl"]} py="2">
+                  Launch Pads
+                </Heading>}
+              {/* LaunchPads favorites */}
+              {data.launchPads &&
+                data.launchPads
+                  .flat()
+                  .filter((launchPad) => favoriteLaunchPads.includes(launchPad.site_id))
+                  .map((launchPad) => (
+                    <FavoriteLaunchPadItem launchPad={launchPad} key={launchPad.site_id} />
+                  ))}
             </Stack>
           </DrawerBody>
 

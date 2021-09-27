@@ -6,7 +6,7 @@ import { BsTrashFill } from 'react-icons/bs';
 
 
 export default function FavoriteLaunchItem({ launch }) {
-    const { favoriteLaunches, toggleFavorite } = useContext(MainContext)
+    const { toggleFavorite } = useContext(MainContext)
     
     return (
       <Box
@@ -77,7 +77,7 @@ export default function FavoriteLaunchItem({ launch }) {
             {launch.mission_name}
           </Box>
           <Box as="button">
-             <BsTrashFill color="red" size="16px" onClick={(e) => toggleFavorite(e, launch.flight_number)} />
+             <BsTrashFill color="red" size="16px" onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} />
           </Box>
           </Box>
         </Box>

@@ -11,7 +11,6 @@ import Breadcrumbs from "./breadcrumbs";
 import LoadMoreButton from "./load-more-button";
 
 
-
 export default function Launches() {
   const { data, error, isValidating, setSize, size, PAGE_SIZE } = useContext(MainContext)
 
@@ -21,9 +20,9 @@ export default function Launches() {
         items={[{ label: "Home", to: "/" }, { label: "Launches" }]}
       />
       <SimpleGrid m={[2, null, 6]} minChildWidth="350px" spacing="4">
-        {error && <Error />}
-        {data &&
-          data
+        {error.launches && <Error />}
+        {data.launches &&
+          data.launches
             .flat()
             .map((launch) => (
               <LaunchItem launch={launch} key={launch.flight_number} />
@@ -31,9 +30,9 @@ export default function Launches() {
       </SimpleGrid>
       <LoadMoreButton
         loadMore={() => setSize(size + 1)}
-        data={data}
+        data={data.launches}
         pageSize={PAGE_SIZE}
-        isLoadingMore={isValidating}
+        isLoadingMore={isValidating.launches}
       />
     </div>
   );
@@ -97,16 +96,14 @@ export function LaunchItem({ launch }) {
             {launch.rocket.rocket_name} &bull; {launch.launch_site.site_name}
           </Box>
           </Box>
-          
           <Box>
             {favoriteLaunches && favoriteLaunches.includes(launch.flight_number) ?
-             <BsFillHeartFill color="red" onClick={(e) => toggleFavorite(e, launch.flight_number)} size="24px" />
+             <BsFillHeartFill color="red" onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} size="24px" />
              :
-             <BsHeart onClick={(e) => toggleFavorite(e, launch.flight_number)} size="24px" />
+             <BsHeart onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} size="24px" />
             }
           </Box>
         </Box>
-
         <Box
           mt="1"
           fontWeight="semibold"
