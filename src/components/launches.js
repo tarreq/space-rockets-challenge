@@ -3,12 +3,13 @@ import { MainContext } from "../contexts/MainContext"
 import { Badge, Box, Image, SimpleGrid, Text, Flex } from "@chakra-ui/core";
 import { format as timeAgo } from "timeago.js";
 import { Link } from "react-router-dom";
-import { BsHeart, BsFillHeartFill } from 'react-icons/bs';
 
 import { formatDate } from "../utils/format-date";
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
 import LoadMoreButton from "./load-more-button";
+import FavoriteToggleButton from "./FavoriteToggleButton"
+
 
 
 export default function Launches() {
@@ -96,14 +97,13 @@ export function LaunchItem({ launch }) {
             {launch.rocket.rocket_name} &bull; {launch.launch_site.site_name}
           </Box>
           </Box>
-          <Box>
-            {favoriteLaunches && favoriteLaunches.includes(launch.flight_number) ?
-             <BsFillHeartFill color="red" onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} size="24px" />
-             :
-             <BsHeart onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} size="24px" />
-            }
-          </Box>
+          <FavoriteToggleButton 
+            favorites={favoriteLaunches}
+            id={launch.flight_number}
+            onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} 
+          />
         </Box>
+
         <Box
           mt="1"
           fontWeight="semibold"

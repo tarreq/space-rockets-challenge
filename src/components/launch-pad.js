@@ -1,6 +1,5 @@
 import React, {useContext} from "react";
 import { MainContext } from "../contexts/MainContext"
-import { BsHeart, BsFillHeartFill } from 'react-icons/bs';
 import { useParams } from "react-router-dom";
 import { MapPin, Navigation } from "react-feather";
 import {
@@ -23,6 +22,7 @@ import { useSpaceX } from "../utils/use-space-x";
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
 import { LaunchItem } from "./launches";
+import FavoriteToggleButton from "./FavoriteToggleButton"
 
 export default function LaunchPad() {
   let { launchPadId } = useParams();
@@ -109,13 +109,11 @@ function Header({ launchPad }) {
             Retired
           </Badge>
         )}
-        <Box as="button">
-            {favoriteLaunchPads && favoriteLaunchPads.includes(launchPad.site_id) ?
-             <BsFillHeartFill color="red" onClick={(e) => toggleFavorite(e, launchPad.site_id, 'launchPads')} size="24px" />
-             :
-             <BsHeart onClick={(e) => toggleFavorite(e, launchPad.site_id, 'launchPads')} size="24px" />
-            }
-          </Box>
+        <FavoriteToggleButton 
+          favorites={favoriteLaunchPads}
+          id={launchPad.site_id}
+          onClick={(e) => toggleFavorite(e, launchPad.site_id, 'launchPads')} 
+        />
       </Stack>
     </Flex>
   );

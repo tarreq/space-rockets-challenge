@@ -3,7 +3,8 @@ import { MainContext } from "../contexts/MainContext"
 import { useParams, Link as RouterLink } from "react-router-dom";
 import { format as timeAgo } from "timeago.js";
 import { Watch, MapPin, Navigation, Layers } from "react-feather";
-import { BsHeart, BsFillHeartFill } from 'react-icons/bs';
+import FavoriteToggleButton from "./FavoriteToggleButton"
+
 import {
   Flex,
   Heading,
@@ -113,13 +114,11 @@ function Header({ launch }) {
             Failed
           </Badge>
         )}
-        <Box as="button">
-            {favoriteLaunches && favoriteLaunches.includes(launch.flight_number) ?
-             <BsFillHeartFill color="red" onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} size="24px" />
-             :
-             <BsHeart onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} size="24px" />
-            }
-          </Box>
+        <FavoriteToggleButton 
+          favorites={favoriteLaunches}
+          id={launch.flight_number}
+          onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} 
+        />
       </Stack>
     </Flex>
   );

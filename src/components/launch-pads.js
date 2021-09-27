@@ -2,8 +2,7 @@ import React, { useContext } from "react";
 import { MainContext } from "../contexts/MainContext"
 import { Badge, Box, SimpleGrid, Text } from "@chakra-ui/core";
 import { Link } from "react-router-dom";
-import { BsHeart, BsFillHeartFill } from 'react-icons/bs';
-
+import FavoriteToggleButton from "./FavoriteToggleButton"
 
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
@@ -72,13 +71,11 @@ function LaunchPadItem({ launchPad }) {
             {launchPad.attempted_launches} attempted &bull;{" "}
             {launchPad.successful_launches} succeeded
           </Box>
-          <Box as="button">
-            {favoriteLaunchPads && favoriteLaunchPads.includes(launchPad.site_id) ?
-             <BsFillHeartFill color="red" onClick={(e) => toggleFavorite(e, launchPad.site_id, 'launchPads')} size="24px" />
-             :
-             <BsHeart onClick={(e) => toggleFavorite(e, launchPad.site_id, 'launchPads')} size="24px" />
-            }
-          </Box>
+          <FavoriteToggleButton 
+            favorites={favoriteLaunchPads}
+            id={launchPad.site_id}
+            onClick={(e) => toggleFavorite(e, launchPad.site_id, 'launchPads')} 
+          />
         </Box>
 
         <Box
