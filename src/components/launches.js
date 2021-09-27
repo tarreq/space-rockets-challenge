@@ -1,35 +1,29 @@
-import React from "react";
+import React, { useContext } from "react";
+import { MainContext } from "../contexts/MainContext"
 import { Badge, Box, Image, SimpleGrid, Text, Flex } from "@chakra-ui/core";
 import { format as timeAgo } from "timeago.js";
 import { Link } from "react-router-dom";
 
-import { useSpaceXPaginated } from "../utils/use-space-x";
 import { formatDate } from "../utils/format-date";
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
 import LoadMoreButton from "./load-more-button";
+import FavoriteToggleButton from "./FavoriteToggleButton"
 
-const PAGE_SIZE = 12;
+
 
 export default function Launches() {
-  const { data, error, isValidating, setSize, size } = useSpaceXPaginated(
-    "/launches/past",
-    {
-      limit: PAGE_SIZE,
-      order: "desc",
-      sort: "launch_date_utc",
-    }
-  );
-  console.log(data, error);
+  const { data, error, isValidating, setSize, size, PAGE_SIZE } = useContext(MainContext)
+
   return (
     <div>
       <Breadcrumbs
         items={[{ label: "Home", to: "/" }, { label: "Launches" }]}
       />
       <SimpleGrid m={[2, null, 6]} minChildWidth="350px" spacing="4">
-        {error && <Error />}
-        {data &&
-          data
+        {error.launches && <Error />}
+        {data.launches &&
+          data.launches
             .flat()
             .map((launch) => (
               <LaunchItem launch={launch} key={launch.flight_number} />
@@ -37,15 +31,17 @@ export default function Launches() {
       </SimpleGrid>
       <LoadMoreButton
         loadMore={() => setSize(size + 1)}
-        data={data}
+        data={data.launches}
         pageSize={PAGE_SIZE}
-        isLoadingMore={isValidating}
+        isLoadingMore={isValidating.launches}
       />
     </div>
   );
 }
 
 export function LaunchItem({ launch }) {
+  const { favoriteLaunches, toggleFavorite } = useContext(MainContext)
+  
   return (
     <Box
       as={Link}
@@ -79,7 +75,8 @@ export function LaunchItem({ launch }) {
       />
 
       <Box p="6">
-        <Box d="flex" alignItems="baseline">
+        <Box d="flex" alignItems="baseline" justifyContent="space-between">
+          <Box d="flex">
           {launch.launch_success ? (
             <Badge px="2" variant="solid" variantColor="green">
               Successful
@@ -99,6 +96,12 @@ export function LaunchItem({ launch }) {
           >
             {launch.rocket.rocket_name} &bull; {launch.launch_site.site_name}
           </Box>
+          </Box>
+          <FavoriteToggleButton 
+            favorites={favoriteLaunches}
+            id={launch.flight_number}
+            onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} 
+          />
         </Box>
 
         <Box

@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useContext} from "react";
+import { MainContext } from "../contexts/MainContext"
 import { useParams, Link as RouterLink } from "react-router-dom";
 import { format as timeAgo } from "timeago.js";
 import { Watch, MapPin, Navigation, Layers } from "react-feather";
+import FavoriteToggleButton from "./FavoriteToggleButton"
+
 import {
   Flex,
   Heading,
@@ -64,6 +67,8 @@ export default function Launch() {
 }
 
 function Header({ launch }) {
+  const { favoriteLaunches, toggleFavorite } = useContext(MainContext)
+
   return (
     <Flex
       bgImage={`url(${launch.links.flickr_images[0]})`}
@@ -109,6 +114,11 @@ function Header({ launch }) {
             Failed
           </Badge>
         )}
+        <FavoriteToggleButton 
+          favorites={favoriteLaunches}
+          id={launch.flight_number}
+          onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} 
+        />
       </Stack>
     </Flex>
   );

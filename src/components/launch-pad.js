@@ -1,4 +1,5 @@
-import React from "react";
+import React, {useContext} from "react";
+import { MainContext } from "../contexts/MainContext"
 import { useParams } from "react-router-dom";
 import { MapPin, Navigation } from "react-feather";
 import {
@@ -21,6 +22,7 @@ import { useSpaceX } from "../utils/use-space-x";
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
 import { LaunchItem } from "./launches";
+import FavoriteToggleButton from "./FavoriteToggleButton"
 
 export default function LaunchPad() {
   let { launchPadId } = useParams();
@@ -68,6 +70,8 @@ const randomColor = (start = 200, end = 250) =>
   `hsl(${start + end * Math.random()}, 80%, 90%)`;
 
 function Header({ launchPad }) {
+  const { favoriteLaunchPads, toggleFavorite } = useContext(MainContext)
+
   return (
     <Flex
       background={`linear-gradient(${randomColor()}, ${randomColor()})`}
@@ -105,6 +109,11 @@ function Header({ launchPad }) {
             Retired
           </Badge>
         )}
+        <FavoriteToggleButton 
+          favorites={favoriteLaunchPads}
+          id={launchPad.site_id}
+          onClick={(e) => toggleFavorite(e, launchPad.site_id, 'launchPads')} 
+        />
       </Stack>
     </Flex>
   );
