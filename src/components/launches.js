@@ -3,6 +3,7 @@ import { MainContext } from "../contexts/MainContext"
 import { Badge, Box, Image, SimpleGrid, Text, Flex } from "@chakra-ui/core";
 import { format as timeAgo } from "timeago.js";
 import { Link } from "react-router-dom";
+import { IoMdRocket } from 'react-icons/io'
 
 import { formatDate } from "../utils/format-date";
 import Error from "./error";
@@ -40,7 +41,7 @@ export default function Launches() {
 }
 
 export function LaunchItem({ launch }) {
-  const { favoriteLaunches, toggleFavorite } = useContext(MainContext)
+  const { favoriteLaunches, toggleFavorite, launchRocket } = useContext(MainContext)
   
   return (
     <Box
@@ -97,11 +98,20 @@ export function LaunchItem({ launch }) {
             {launch.rocket.rocket_name} &bull; {launch.launch_site.site_name}
           </Box>
           </Box>
-          <FavoriteToggleButton 
+          <Box d="flex">
+          <Box m={2} as="button" onClick={(e) => launchRocket(e, launch.launch_success)}
+            style={{
+              transform: launch.launch_success ? 'rotate(0deg)' : 'rotate(180deg)'
+            }}
+          >
+            <IoMdRocket size="24px" />
+          </Box>
+            <FavoriteToggleButton 
             favorites={favoriteLaunches}
             id={launch.flight_number}
             onClick={(e) => toggleFavorite(e, launch.flight_number, 'launches')} 
           />
+          </Box>
         </Box>
 
         <Box
