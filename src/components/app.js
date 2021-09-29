@@ -13,7 +13,8 @@ import {
   DrawerCloseButton,
   Button,
   Stack,
-  Heading
+  Heading,
+  Image
   } from "@chakra-ui/core";
 
 import { useSpaceXPaginated } from "../utils/use-space-x";
@@ -27,11 +28,34 @@ import { MainContext } from "../contexts/MainContext"
 import FavoriteLaunchItem from "./FavoriteLaunchItem";
 import FavoriteLaunchPadItem from "./FavoriteLaunchPadItem";
 
+import { useTransition, animated as a } from 'react-spring';
+
 const PAGE_SIZE = 12;
 
 export default function App() {
   const [favorites, setFavorites] = useState({launches: [], launchPads: []})
   const [favoritesLoaded, setFavoritesLoaded] = useState(false)
+  const [rocketVisible, setRocketVisible] = useState(false)
+  const [flyingRocketSuccess, setFlyingRocketSuccess] = useState(null)
+
+  const successAudio = new Audio("rocket_sound.mp3");
+  const failureAudio = new Audio("failure_sound.mp3");
+
+  const transition = useTransition(rocketVisible, {
+    from: {x: 0, y: flyingRocketSuccess ? 500 : -900, opacity: flyingRocketSuccess ? .3 : 1},
+    enter: {x: 0, y: flyingRocketSuccess ? -900 : 500, opacity: flyingRocketSuccess ? 1 : .3},
+    config: {duration : 1500},
+    onRest: () => setRocketVisible(false),
+    leave: {}
+  })
+
+  const launchRocket = (e, success) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setFlyingRocketSuccess(success)
+    success ?  successAudio.play() : failureAudio.play()
+    setRocketVisible(true)
+  }
 
   const { data: launchesData, error: launchesDataError, isValidating: isValidatingLaunches, setSize, size } = useSpaceXPaginated(
     "/launches/past",
@@ -84,6 +108,7 @@ export default function App() {
     favoriteLaunches: favorites['launches'],
     favoriteLaunchPads: favorites['launchPads'],
     toggleFavorite,
+    launchRocket,
     data: {launches: launchesData, launchPads: launchPadsData}, 
     error: {launches: launchesDataError, launchPads: launchPadsDataError}, 
     isValidating: {launches: isValidatingLaunches, launchPads: isValidatingLaunchPads}, 
@@ -96,6 +121,31 @@ export default function App() {
     <div>
       <MainContext.Provider value={store}>
         <NavBar />
+        {transition ((style, item) =>
+          item ? 
+          <a.div style={{
+            position: 'fixed',
+            display: 'felx',
+            left: '50%',
+            top: '70%',
+            zIndex: 9,
+            width: '100px',
+            height: '100px',
+            margin: '0 auto',
+            transform: flyingRocketSuccess ? 'rotate(0deg)' : 'rotate(180deg)',
+            ...style
+          }}>
+            <Image
+            top="5"
+            right="5"
+            src="rocket.png"
+            height="200px"
+            objectFit="contain"
+            objectPosition="bottom"
+          />
+            </a.div>
+          : ''
+        )}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/launches" element={<Launches />} />
